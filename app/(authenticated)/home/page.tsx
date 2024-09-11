@@ -1,11 +1,11 @@
-// pages/home.tsx
-'use client'; // This ensures the Home page runs on the client
+'use client'; 
 
 import TweetForm from '@/components/TweetForm';
 import TweetCard from '@/components/TweetCard';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
 import { Tweet } from '@/types';
+import { LoadingSpinner } from '@/components/ui/spinner';
 
 export default function Home() {
   const { authorId, loading } = useAuth();
@@ -30,11 +30,11 @@ export default function Home() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className='flex w-full flex-col items-center justify-center h-[90vh]'><LoadingSpinner className={''} /></div>;
   }
 
   return (
-    <div className="flex w-full flex-col items-center md:px-80 px-2 py-4">
+    <div className="flex w-full flex-col items-center md:px-80 px-2 py-4 bg-[##F2F2F2]">
       {authorId && <TweetForm authorId={authorId} />}
 
       <div className="w-full mt-6 space-y-8">
