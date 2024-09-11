@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useState } from "react"
+import { useRouter } from 'next/navigation';
+
 
 // Define the Zod schema for validation
 const loginSchema = z.object({
@@ -26,6 +28,7 @@ type LoginFormInputs = z.infer<typeof loginSchema>
 
 export default function LoginForm({ toggleForm }: { toggleForm: () => void }) {
     const [error, setError] = useState('');
+    const router = useRouter();
     const form = useForm<LoginFormInputs>({
         resolver: zodResolver(loginSchema),
     })
@@ -46,6 +49,7 @@ export default function LoginForm({ toggleForm }: { toggleForm: () => void }) {
         if (response.ok) {
           console.log(data.token);
           localStorage.setItem('token', data.token);
+          router.push('/home');
         } else {
           setError(data.error);
         }
