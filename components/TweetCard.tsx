@@ -31,12 +31,8 @@ const TweetCard = forwardRef<HTMLDivElement, { tweet: Tweet, authorId: string }>
             className="w-full h-auto rounded-lg"
           />
         )}
-        <TweetActions setShowComments={setShowComments} />
-        <TweetData
-          comments={tweet.comments}
-          retweets={tweet.retweets}
-          likes={tweet.likes}
-        />
+        <TweetActions setShowComments={setShowComments} tweetId={tweet.id} authorId={authorId}/>
+        <TweetData tweetId={tweet.id}/>
         <CommentsSection tweetId={tweet.id} authorId={authorId} showComments={showComments} />
       </div>
     );
