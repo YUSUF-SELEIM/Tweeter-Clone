@@ -8,30 +8,34 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid()) @map("_id")
-  username  String    @unique
-  email     String    @unique
-  password  String
-  bio       String?
-  imageUrl  String?
-  bannerUrl String?
-  tweets    Tweet[] 
-  comments  Comment[]
-  likes     Like[]    
-  retweets  Retweet[]
-  createdAt DateTime  @default(now())
+  id          String    @id @default(cuid()) @map("_id")
+  username    String    @unique
+  email       String    @unique
+  password    String
+  bio         String?
+  imageUrl    String?
+  bannerUrl   String?
+  tweets      Tweet[]  
+  comments    Comment[]
+  likes       Like[]
+  retweets    Retweet[]
+  savedTweets SaveTweet[]  
+  createdAt   DateTime  @default(now())
 }
+
 model Tweet {
-  id        String    @id @default(cuid()) @map("_id")
-  content   String
-  imageUrl  String? // Optional media URL
-  comments  Comment[] 
-  author    User      @relation(fields: [authorId], references: [id])
-  authorId  String
-  likes     Like[]   
-  retweets  Retweet[] // List of users who retweeted that tweet
-  createdAt DateTime  @default(now())
+  id          String    @id @default(cuid()) @map("_id")
+  content     String
+  imageUrl    String?  // Optional media URL
+  comments    Comment[]
+  author      User     @relation(fields: [authorId], references: [id])
+  authorId    String
+  likes       Like[]
+  retweets    Retweet[] // List of users who retweeted that tweet
+  saves       SaveTweet[]    
+  createdAt   DateTime  @default(now())
 }
+
 
 model Comment {
   id        String   @id @default(cuid()) @map("_id")
@@ -52,6 +56,13 @@ model Like {
 }
 
 model Retweet {
+  id      String @id @default(cuid()) @map("_id")
+  userId  String
+  tweetId String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tweet   Tweet  @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+}
+model SaveTweet {
   id      String @id @default(cuid()) @map("_id")
   userId  String
   tweetId String
