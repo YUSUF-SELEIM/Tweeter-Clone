@@ -2,8 +2,8 @@ import jwt from 'jsonwebtoken';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'tweeter';
 
-export function generateToken(userId: number) {
-  return jwt.sign({ userId }, SECRET_KEY, { expiresIn: '1h' });
+export function generateToken(userId: string) {
+  return jwt.sign({ userId }, SECRET_KEY, { expiresIn: '1d' });
 }
 
 export function verifyToken(token: string) {
