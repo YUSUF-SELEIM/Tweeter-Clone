@@ -1,7 +1,7 @@
 export interface Comment {
     id: string;
     user: {
-      username: string; // Ensure this matches
+      username: string;
       imageUrl: string;
     };
     content: string;
@@ -11,13 +11,14 @@ export interface Comment {
     id: string;
     content: string;
     imageUrl?: string;
-    author: { // Changed from `user` to `author` to match Prisma query
+    author: {
       username: string;
-      imageUrl?: string; // Made optional to match Prisma query
+      imageUrl?: string;
     };
     likes: number;
     retweets: number;
     comments: number;
     commentsList: Comment[];
+    createdAt: string;
   }
   
