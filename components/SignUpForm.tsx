@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { useState } from "react"
 
 // Define the Zod schema for validation
 const signUpSchema = z.object({
@@ -25,13 +26,31 @@ const signUpSchema = z.object({
 type SignUpFormInputs = z.infer<typeof signUpSchema>
 
 export default function SignUpForm({ toggleForm }: { toggleForm: () => void }) {
+    const [error, setError] = useState('');
     const form = useForm<SignUpFormInputs>({
         resolver: zodResolver(signUpSchema),
     })
 
-    const onSubmit = (data: SignUpFormInputs) => {
-        console.log(data)
-        // Handle sign-up logic here
+    const onSubmit = async (formData: SignUpFormInputs) => {
+        console.log(formData)
+        try {
+            const response = await fetch('/api/auth/signup', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify({ username: formData.username, email: formData.email, password: formData.password }),
+            });
+      
+            const data = await response.json();
+            if (response.ok) {
+              console.log(data.message);
+            } else {
+              setError(data.error);
+            }
+          } catch (err) {
+            setError('An unexpected error occurred');
+          }
     }
 
     return (
@@ -81,6 +100,8 @@ export default function SignUpForm({ toggleForm }: { toggleForm: () => void }) {
                                 />
                             </FormControl>
                             <FormMessage>{form.formState.errors.password?.message}</FormMessage>
+                            <FormMessage>  {error && <div>{error}</div>}</FormMessage>
+
                         </FormItem>
 
                         <Button type="submit" className="w-full">
@@ -90,7 +111,7 @@ export default function SignUpForm({ toggleForm }: { toggleForm: () => void }) {
                         <div className="mt-4 text-center text-sm">
                             Already have an account?{" "}
                             <Link href="#" className="underline" onClick={toggleForm}>
-                                Sign in
+                                Log in
                             </Link>
                         </div>
                     </form>

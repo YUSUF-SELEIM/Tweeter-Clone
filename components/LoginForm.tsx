@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { useState } from "react"
 
 // Define the Zod schema for validation
 const loginSchema = z.object({
@@ -24,14 +25,35 @@ const loginSchema = z.object({
 type LoginFormInputs = z.infer<typeof loginSchema>
 
 export default function LoginForm({ toggleForm }: { toggleForm: () => void }) {
+    const [error, setError] = useState('');
     const form = useForm<LoginFormInputs>({
         resolver: zodResolver(loginSchema),
     })
 
-    const onSubmit = (data: LoginFormInputs) => {
-        console.log(data)
-        // Handle login logic here
-    }
+    const onSubmit = async (formData: LoginFormInputs) => {
+        console.log(formData)
+        
+    try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: formData.email, password: formData.password }),
+        });
+  
+        const data = await response.json();
+        if (response.ok) {
+          console.log(data.token);
+          localStorage.setItem('token', data.token);
+        } else {
+          setError(data.error);
+        }
+      } catch (err) {
+        setError('An unexpected error occurred');
+      }
+    };
+    
 
     return (
         <Card className="md:w-96">
@@ -71,6 +93,9 @@ export default function LoginForm({ toggleForm }: { toggleForm: () => void }) {
                             <FormMessage>
                                 {form.formState.errors.password?.message}
                             </FormMessage>
+                            <FormMessage>
+                            {error && <div>{error}</div>}
+                            </FormMessage>
                         </FormItem>
 
                         <Button type="submit" className="w-full">
@@ -79,7 +104,7 @@ export default function LoginForm({ toggleForm }: { toggleForm: () => void }) {
                         <div className="mt-4 text-center text-sm">
                             Don&apos;t have an account?{" "}
                             <Link href="#" className="underline" onClick={toggleForm}>
-                                Log in
+                                Sign up
                             </Link>
                         </div>
                     </form>
