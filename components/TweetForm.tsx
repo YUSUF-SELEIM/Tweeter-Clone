@@ -54,6 +54,7 @@ export default function TweetForm({ authorId }: { authorId: string }) {
         setTweetContent('');
         setImageUrl(null);
         console.log('Tweet successfully created');
+        location.reload();
       } else {
         console.error('Failed to create tweet');
       }
