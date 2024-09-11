@@ -1,4 +1,7 @@
-import Navbar from '@/components/Navbar';
+"use client";
+
+import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/context/AuthContext";
 
 export default function AuthenticatedLayout({
   children,
@@ -6,11 +9,9 @@ export default function AuthenticatedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <Navbar />
-        <main>{children}</main>
-      </body>
-    </html>
+    <AuthProvider>
+      <Navbar />
+      <main>{children}</main>
+    </AuthProvider>
   );
 }
