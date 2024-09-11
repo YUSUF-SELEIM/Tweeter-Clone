@@ -4,31 +4,20 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import TweetForm from '@/components/TweetForm';
 import TweetCard from '@/components/TweetCard';
-
-// Dummy data for tweets (replace with API call)
-const dummyTweets = [
-  {
-    id: '1',
-    user: { name: 'John Doe', imageUrl: '/path/to/image.jpg' },
-    content: 'This is a tweet!',
-    imageUrl: '/path/to/tweet-image.jpg',
-    likes: 12,
-    retweets: 5,
-    comments: 3,
-  },
-  // Add more dummy tweets here
-];
+import { jwtDecode } from 'jwt-decode';
+import { Tweet } from '@/types';
 
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [tweets, setTweets] = useState(dummyTweets);
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [authorId, setAuthorId] = useState<string | null>(null); 
 
   useEffect(() => {
     const token = localStorage.getItem('token');
 
     if (!token) {
-      router.push('/'); 
+      router.push('/');
       return;
     }
 
@@ -43,18 +32,25 @@ export default function Home() {
         });
 
         if (!response.ok) {
-          router.push('/'); 
+          router.push('/');
         } else {
-          setLoading(false); // Valid token, stop loading
+          const decodedToken: { userId: string } = jwtDecode(token);
+          setAuthorId(decodedToken.userId); // Set the userId from the token
 
-          // Fetch tweets from API (replace with real API call)
-          // const tweetsResponse = await fetch('/api/tweets');
-          // const tweetsData = await tweetsResponse.json();
-          // setTweets(tweetsData);
+          // Fetch tweets from the API
+          const tweetsResponse = await fetch('/api/tweet');
+          if (tweetsResponse.ok) {
+            const tweetsData = await tweetsResponse.json();
+            setTweets(tweetsData);
+          } else {
+            console.error('Failed to fetch tweets');
+          }
         }
       } catch (err) {
         console.error('Error validating token:', err);
         router.push('/');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -66,12 +62,12 @@ export default function Home() {
   }
 
   return (
-    <div className="flex w-full flex-col items-center md:px-80 px-2 py-4 ">
-      <TweetForm />
+    <div className="flex w-full flex-col items-center md:px-80 px-2 py-4">
+      {authorId && <TweetForm authorId={authorId} />}
 
       <div className="w-full mt-6 space-y-4">
         {tweets.map((tweet) => (
-          <TweetCard key={tweet.id} tweet={tweet} />
+        <TweetCard key={tweet.id} tweet={tweet} />
         ))}
       </div>
     </div>
