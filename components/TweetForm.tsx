@@ -39,7 +39,7 @@ export default function TweetForm({ authorId }: { authorId: string }) {
       const payload = {
         authorId,
         content: tweetContent,
-        imageUrl, 
+        imageUrl,
       };
 
       const response = await fetch('/api/tweet', {
@@ -66,9 +66,8 @@ export default function TweetForm({ authorId }: { authorId: string }) {
 
   return (
     <Card className="w-full border rounded-lg p-4 bg-background">
-      <h2 className="text-sm font-semibold mb-2">Tweet something</h2>
-      <Separator className="my-4" />
-
+      <h2 className="text-sm font-semibold">Tweet something</h2>
+      <Separator className="my-2" />
       <Textarea
         placeholder="What's happening?"
         value={tweetContent}
