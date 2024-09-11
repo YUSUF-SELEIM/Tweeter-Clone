@@ -1,58 +1,123 @@
-import { useState, useEffect } from 'react';
-// import { Button } from '@/components/ui/button'; 
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button'; 
 import { Textarea } from '@/components/ui/textarea'; 
 import { Comment } from '@/types';
+import { addComment, getTweetComments } from '@/lib/actions'; 
 
-interface CommentsSectionProps {
-  comments: Comment[];
-}
-
-export default function CommentsSection({ comments }: CommentsSectionProps) {  
+export default function CommentsSection({ tweetId, authorId, showComments }: { tweetId: string, authorId: string, showComments: boolean }) {  
   const [newComment, setNewComment] = useState('');
-  const [commentsList, setCommentsList] = useState<Comment[]>(comments || []); 
+  const [commentsList, setCommentsList] = useState<Comment[]>([]); 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const commentsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setCommentsList(comments || []);
-  }, [comments]);
+    const fetchComments = async () => {
+      if (!showComments) return;
+
+      setLoading(true);
+      setError(null);
+      try {
+        const comments = await getTweetComments(tweetId);
+        const commentsWithUser = comments.map(comment => ({
+          ...comment,
+          user: {
+            username: comment.author.username,
+            imageUrl: comment.author.imageUrl || 'https://via.placeholder.com/40',
+          },
+        }));
+        setCommentsList(commentsWithUser);
+      } catch (err) {
+        setError('Error fetching comments. Please try again later.');
+        console.error('Error fetching comments:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchComments(); 
+  }, [tweetId, showComments]);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewComment(e.target.value);
   };
 
-  const handleAddComment = () => {
-   console.log('Adding comment:', newComment);
+  const handleAddComment = async () => {
+    if (!newComment.trim()) {
+      alert('Please write something before commenting!');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      await addComment(newComment, tweetId, authorId);
+      setNewComment('');
+
+      // Refetch comments to update the list
+      const updatedComments = await getTweetComments(tweetId);
+      const commentsWithUser = updatedComments.map(comment => ({
+        ...comment,
+        user: {
+          username: comment.author.username,
+          imageUrl: comment.author.imageUrl || 'https://via.placeholder.com/40',
+        },
+      }));
+      setCommentsList(commentsWithUser);
+    } catch (error) {
+      setError('Error adding comment. Please try again later.');
+      console.error('Error adding comment:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="flex flex-col mt-2">
-      <div className="flex w-full">
-        <Textarea
-          className="w-full h-fit px-2 border rounded-lg resize-none"
-          placeholder="Add a comment..."
-          value={newComment}
-          onChange={handleCommentChange}
-        />
-      </div>
+  useEffect(() => {
+    if (showComments && commentsRef.current) {
+      commentsRef.current.scrollIntoView({ behavior: 'smooth' }); 
+    }
+  }, [showComments]);
 
-      <div className="space-y-2">
-        {commentsList.length > 0 ? ( 
-          commentsList.map(comment => (
-            <div key={comment.id} className="flex items-start space-x-2 border-b py-2">
-              <img
-                src={comment.user.imageUrl || 'https://via.placeholder.com/40'} 
-                alt={comment.user.username}
-                className="w-8 h-8 rounded-full"
-              />
-              <div>
-                <span className="font-semibold">{comment.user.username}</span>
-                <p>{comment.content}</p>
+  return (
+    <>
+      {showComments && (
+        <div ref={commentsRef} className="flex flex-col mt-2 p-2 sm:p-4 ">
+          <Textarea
+            className="w-full border rounded-md text-sm sm:text-base resize-none"
+            placeholder="Add a comment..."
+            value={newComment}
+            onChange={handleCommentChange}
+            disabled={loading}
+          />
+          <Button className="mt-2 text-xs sm:text-sm" onClick={handleAddComment} disabled={loading}>
+            {loading ? 'Posting...' : 'Comment'}
+          </Button>
+
+          {loading && <div className="mt-4 text-xs sm:text-sm">Loading comments...</div>}
+          {error && <div className="mt-4 text-red-500 text-xs sm:text-sm">{error}</div>}
+          
+          {commentsList.length === 0 && !loading && !error && (
+            <div className="mt-4 text-gray-500 text-xs sm:text-sm">No comments yet. Be the first to comment!</div>
+          )}
+
+          <div className="space-y-2 mt-4 text-xs sm:text-sm">
+            {commentsList.map(comment => (
+              <div key={comment.id} className="flex items-start space-x-2 border-b py-2">
+                <img
+                  src={comment.user.imageUrl || 'https://via.placeholder.com/40'} 
+                  alt={comment.user.username}
+                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-full"
+                />
+                <div>
+                  <span className="font-semibold">{comment.user.username}</span>
+                  <p>{comment.content}</p>
+                </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p>No comments yet.</p>
-        )}
-      </div>
-    </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
