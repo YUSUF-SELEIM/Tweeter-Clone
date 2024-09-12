@@ -70,7 +70,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky w-full top-0 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
+      <header className="sticky z-50 w-full top-0 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
         <Link href="#" className="flex items-center gap-2 text-lg font-semibold">
           Tweeter
         </Link>
