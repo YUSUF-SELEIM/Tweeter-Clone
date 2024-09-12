@@ -129,7 +129,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-between bg-background p-4 border-t md:hidden">
+      <nav className="fixed bottom-0 left-0 mt-8 right-0 z-50 flex justify-between bg-background p-4 border-t md:hidden">
         <Link href="/home" className="flex flex-col items-center justify-center text-sm">
           <AiFillHome
             size={24}
