@@ -459,4 +459,30 @@ return prisma.tweet.findMany({
       throw new Error('Failed to fetch saved tweets');
     }
   }
+  export async function getUserFollowers(userId: string) {
+    try {
+      // Fetch the followers where the user is being followed
+      const followRecords = await prisma.follow.findMany({
+        where: { followingId: userId },
+        include: { follower: true }, // Include the user data of the follower
+      });
   
+      // Extract and return the follower user data
+      const followers = followRecords.map(record => record.follower);
+      return followers;
+    } catch (error) {
+      console.error('Error fetching user followers:', error);
+      throw new Error('Failed to fetch user followers');
+    }
+  }
+  export async function updateUserBio(userId: string, newBio: string) {
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { bio: newBio },
+      });
+    } catch (error) {
+      console.error('Error updating user bio:', error);
+      throw new Error('Failed to update bio');
+    }
+  }
