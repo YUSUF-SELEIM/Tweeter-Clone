@@ -1,29 +1,27 @@
 import React, { useEffect } from 'react';
-import { getUserTweetsAndRetweets, getUserLikedTweets } from '@/lib/actions'; 
+import { getUserTweetsAndRetweets, getUserLikedTweets } from '@/lib/actions';
 
 interface ProfileActionsProps {
-  userId: string; 
-  setTweets: any;
-  setLikes: any;
-  setActiveTab: any;
+  userId: string;
+  setTweets: React.Dispatch<React.SetStateAction<unknown[]>>;
+  setLikes: React.Dispatch<React.SetStateAction<unknown[]>>;
+  setActiveTab: React.Dispatch<React.SetStateAction<'tweets' | 'likes'>>;
   activeTab: 'tweets' | 'likes';
-  setLoadingTweetsAndLikes: any;
+  setLoadingTweetsAndLikes: React.Dispatch<React.SetStateAction<boolean>>; // Fixed type
 }
 
-const ProfileActions: React.FC<ProfileActionsProps> = ({ userId, activeTab,setActiveTab,setTweets , setLikes ,setLoadingTweetsAndLikes}) => {
+const ProfileActions: React.FC<ProfileActionsProps> = ({ userId, activeTab, setActiveTab, setTweets, setLikes, setLoadingTweetsAndLikes }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-        setLoadingTweetsAndLikes(true);
+      setLoadingTweetsAndLikes(true);
       try {
         if (activeTab === 'tweets') {
           const userTweets = await getUserTweetsAndRetweets(userId);
           setTweets(userTweets);
-          console.log("liked "+userTweets);
         } else if (activeTab === 'likes') {
           const userLikes = await getUserLikedTweets(userId);
           userLikes.map((like) => console.log(like));
-          console.log("likes "+userLikes);
           setLikes(userLikes);
         }
       } catch (error) {
@@ -34,14 +32,14 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ userId, activeTab,setAc
     };
 
     fetchData();
-  }, [activeTab, userId]);
+  }, [activeTab, userId, setTweets, setLikes, setLoadingTweetsAndLikes]);
 
   const handleTabChange = (tab: 'tweets' | 'likes') => {
     setActiveTab(tab);
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg w-full md:w-64 h-[10rem] md:sticky top-20 ">
+    <div className="bg-white shadow-md rounded-lg w-full md:w-64 h-[10rem] md:sticky top-20">
       <div className="flex flex-col justify-center h-full w-full">
         <button
           onClick={() => handleTabChange('tweets')}
