@@ -65,7 +65,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
   if (error) return <div>{error}</div>;
 
   return (
-    <div>
+    <div className="w-full">
     <ProfileHeader
       username={userInfo?.username || ''}
       bio={userInfo?.bio}
@@ -76,7 +76,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     />
 
     {/* Layout with ProfileActions on the left on md+ screens */}
-    <div className="flex flex-col justify-center md:flex-row mt-20 md:gap-8 mx-[5rem]">
+    <div className="w-full flex flex-col justify-center md:flex-row mt-20 md:gap-8 md:mx-[5rem]">
       <ProfileActions
         userId={id}
         activeTab={activeTab}
