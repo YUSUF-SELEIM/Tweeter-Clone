@@ -13,19 +13,21 @@ const TweetCard = forwardRef<HTMLDivElement, { tweet: Tweet, authorId: string }>
     const router = useRouter(); 
 
     const handleProfileClick = () => {
-      router.push(`/profile/${tweet.author.id}`);
+      if (tweet.author && tweet.author.id) {
+        router.push(`/profile/${tweet.author.id}`);
+      }
     };
 
     return (
       <div ref={ref} className="w-full border rounded-lg p-4 bg-background mb-6">
         <div className="flex items-center mb-2 cursor-pointer" onClick={handleProfileClick}>
           <img
-            src={tweet.author.imageUrl || `https://avatar.iran.liara.run/username?username=${tweet.author.username}`}
-            alt={tweet.author.username}
+            src={tweet.author?.imageUrl || `https://avatar.iran.liara.run/username?username=${tweet.author?.username || 'default'}`}
+            alt={tweet.author?.username || 'Default User'}
             className="w-12 h-12 mr-2"
           />
           <div className='flex flex-col'>
-            <span className="font-medium">{tweet.author.username}</span>
+            <span className="font-medium">{tweet.author?.username || 'Unknown User'}</span>
             <span className="text-gray-500 text-xs">{formattedDate}</span>
           </div>
         </div>
