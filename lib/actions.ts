@@ -200,3 +200,64 @@ export async function getLikeStatusOfComment(commentId: string, userId: string) 
 
     return !!existingLike; // Return true if a like exists, otherwise false
 }
+
+export async function getUserInfo(userId: string) {
+    return prisma.user.findUnique({
+        where: {
+            id: userId
+        }
+    });
+}
+export async function followUser(followingId: string, followerId: string) {
+    const existingFollow = await prisma.follow.findFirst({
+        where: {
+            followingId: followingId,//followingId: The ID of the user to be followed.
+            followerId: followerId //followerId: The ID of the user performing the follow action.
+
+        }
+    });
+
+    if (existingFollow) {
+        // If the follow exists, remove it
+        return prisma.follow.delete({
+            where: {
+                id: existingFollow.id
+            }
+        });
+    } else {
+        // If the follow does not exist, create it
+        return prisma.follow.create({
+            data: {
+                followingId: followingId,
+                followerId: followerId
+            }
+        });
+    }
+}
+
+export async function checkIfFollowing(followingId: string, followerId: string) {
+    const existingFollow = await prisma.follow.findFirst({
+        where: {
+            followingId,
+            followerId
+        }
+    });
+
+    return !!existingFollow; // Return true if a follow exists, otherwise false
+}
+
+export async function getNumberOfFollowers(userId: string) {
+    return prisma.follow.count({
+        where: {
+            followingId: userId
+        }
+    });
+}
+
+export async function getNumberOfFollowing(userId: string) {
+    return prisma.follow.count({
+        where: {
+            followerId: userId
+        }
+    });
+}
