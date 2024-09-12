@@ -156,3 +156,47 @@ export async function getNumberOfRetweetsOfTweet(tweetId: string) {
         },
     });
 }
+
+export async function likeAComment(commentId: string, userId: string) {
+    const existingLike = await prisma.commentLike.findFirst({
+        where: {
+            commentId,
+            userId
+        }
+    });
+
+    if (existingLike) {
+        // If the like exists, remove it
+        return prisma.commentLike.delete({
+            where: {
+                id: existingLike.id
+            }
+        });
+    } else {
+        // If the like does not exist, create it
+        return prisma.commentLike.create({
+            data: {
+                commentId,
+                userId
+            }
+        });
+    }
+}   
+export async function getCommentLikes(commentId: string) {
+    return prisma.commentLike.count({
+        where: {
+            commentId
+        }
+    });
+}
+
+export async function getLikeStatusOfComment(commentId: string, userId: string) {
+    const existingLike = await prisma.commentLike.findFirst({
+        where: {
+            commentId,
+            userId
+        }
+    });
+
+    return !!existingLike; // Return true if a like exists, otherwise false
+}
