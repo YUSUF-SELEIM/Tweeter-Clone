@@ -406,4 +406,57 @@ return prisma.tweet.findMany({
     },
     },
 });
-}
+
+}export async function getUserSavedTweets(userId: string) {
+    try {
+      return prisma.tweet.findMany({
+        where: {
+          saves: {
+            some: {
+              userId: userId, // Only get tweets that have been saved by the user
+            },
+          },
+        },
+        select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            author: {
+                select: {
+                id: true,
+                username: true,
+                imageUrl: true,
+                },
+            },
+            comments: {
+                select: {
+                id: true,
+                content: true,
+                author: {
+                    select: {
+                    id: true,
+                    username: true,
+                    imageUrl: true,
+                    },
+                },
+                },
+            },
+            likes: {
+                select: {
+                id: true,
+                userId: true,
+                },
+            },
+            retweets: {
+                select: {
+                id: true,
+                },
+            },
+            },
+      });
+    } catch (error) {
+      console.error('Error fetching user saved tweets:', error);
+      throw new Error('Failed to fetch saved tweets');
+    }
+  }
+  
