@@ -22,12 +22,14 @@ model User {
   savedTweets SaveTweet[]
   createdAt   DateTime    @default(now())
   CommentLike CommentLike[]
+  following   Follow[]    @relation("Following")
+  followers   Follow[]    @relation("Followers")
 }
 
 model Tweet {
   id        String      @id @default(cuid()) @map("_id")
   content   String
-  imageUrl  String? // Optional media URL
+  imageUrl  String?    // Optional media URL
   comments  Comment[]
   author    User        @relation(fields: [authorId], references: [id])
   authorId  String
@@ -78,4 +80,13 @@ model SaveTweet {
   tweetId String
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   tweet   Tweet  @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+}
+
+model Follow {
+  id          String   @id @default(cuid()) @map("_id")
+  followerId  String
+  followingId String
+  follower    User     @relation("Following", fields: [followerId], references: [id])
+  following   User     @relation("Followers", fields: [followingId], references: [id])
+  @@unique([followerId, followingId])
 }
