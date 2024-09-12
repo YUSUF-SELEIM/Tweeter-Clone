@@ -89,8 +89,8 @@ export default function ProfileHeader({
         </div>
 
         <div className="mt-4 md:-mt-4 md:text-left px-5">
-          <h1 className="text-2xl font-semibold">{username}</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl font-semibold text-center md:text-left">{username}</h1>
+          <p className="text-gray-600 text-center">
             {bio}
             {currentUserId === profileId && (
               <Popover open={isEditing} onOpenChange={setIsEditing}>
