@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button'; 
-import { Textarea } from '@/components/ui/textarea'; 
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Comment } from '@/types';
-import { addComment, getTweetComments } from '@/lib/actions'; 
+import { comment, getTweetComments } from '@/lib/actions';
+import { format } from 'date-fns';
+import CommentActions from './CommentActions';
 
-export default function CommentsSection({ tweetId, authorId, showComments }: { tweetId: string, authorId: string, showComments: boolean }) {  
+export default function CommentsSection({ tweetId, authorId, showComments }: { tweetId: string, authorId: string, showComments: boolean }) {
   const [newComment, setNewComment] = useState('');
-  const [commentsList, setCommentsList] = useState<Comment[]>([]); 
+  const [commentsList, setCommentsList] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +38,7 @@ export default function CommentsSection({ tweetId, authorId, showComments }: { t
       }
     };
 
-    fetchComments(); 
+    fetchComments();
   }, [tweetId, showComments]);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -52,7 +54,7 @@ export default function CommentsSection({ tweetId, authorId, showComments }: { t
     setLoading(true);
     setError(null);
     try {
-      await addComment(newComment, tweetId, authorId);
+      await comment(newComment, tweetId, authorId);
       setNewComment('');
 
       // Refetch comments to update the list
@@ -75,14 +77,14 @@ export default function CommentsSection({ tweetId, authorId, showComments }: { t
 
   useEffect(() => {
     if (showComments && commentsRef.current) {
-      commentsRef.current.scrollIntoView({ behavior: 'smooth' }); 
+      commentsRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [showComments]);
 
   return (
     <>
       {showComments && (
-        <div ref={commentsRef} className="flex flex-col mt-2 p-2 sm:p-4 ">
+        <div ref={commentsRef} className="flex flex-col mt-2 p-2 sm:p-4">
           <Textarea
             className="w-full border rounded-md text-sm sm:text-base resize-none"
             placeholder="Add a comment..."
@@ -96,23 +98,31 @@ export default function CommentsSection({ tweetId, authorId, showComments }: { t
 
           {loading && <div className="mt-4 text-xs sm:text-sm">Loading comments...</div>}
           {error && <div className="mt-4 text-red-500 text-xs sm:text-sm">{error}</div>}
-          
+
           {commentsList.length === 0 && !loading && !error && (
             <div className="mt-4 text-gray-500 text-xs sm:text-sm">No comments yet. Be the first to comment!</div>
           )}
 
           <div className="space-y-2 mt-4 text-xs sm:text-sm">
             {commentsList.map(comment => (
-              <div key={comment.id} className="flex items-start space-x-2 border-b py-2">
-                <img
-                  src={comment.user.imageUrl || 'https://via.placeholder.com/40'} 
-                  alt={comment.user.username}
-                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-full"
-                />
-                <div>
-                  <span className="font-semibold">{comment.user.username}</span>
-                  <p>{comment.content}</p>
+              <div key={comment.id} className="flex flex-col h-full w-full border-b">
+                <div  className="flex items-start py-2  space-x-2 ">
+                  <img
+                    src={comment.user.imageUrl || 'https://via.placeholder.com/40'}
+                    alt={comment.user.username}
+                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full"
+                  />
+                  <div className='bg-[#FAFAFA] px-3 py-2 w-full'>
+                    <div className="flex justify-between w-full">
+                      <span className="font-semibold">{comment.user.username}</span>
+                      <span className="text-gray-500 text-xs ml-2">
+                        {format(new Date(comment.createdAt), "d MMMM 'at' HH:mm")}
+                      </span>
+                    </div>
+                    <p className='font-light'>{comment.content}</p>
+                  </div>
                 </div>
+                 <CommentActions commentId={comment.id} authorId={authorId} />
               </div>
             ))}
           </div>
