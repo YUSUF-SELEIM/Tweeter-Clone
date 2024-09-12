@@ -13,6 +13,7 @@ export interface Comment {
     content: string;
     imageUrl?: string;
     author: {
+      id: string;
       username: string;
       imageUrl?: string;
     };
