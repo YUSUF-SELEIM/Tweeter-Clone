@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { followUser, checkIfFollowing, getNumberOfFollowers, getNumberOfFollowing } from '@/lib/actions';
-import ProfileHeaderData from './ProfileHeaderData'; 
+import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
+import { followUser, checkIfFollowing, getNumberOfFollowers, getNumberOfFollowing, updateUserBio } from '@/lib/actions';
+import ProfileHeaderData from './ProfileHeaderData';
+import { AiOutlineEdit } from "react-icons/ai";
 
 interface ProfileHeaderProps {
   username: string;
@@ -24,6 +26,8 @@ export default function ProfileHeader({
   const [loading, setLoading] = useState<boolean>(true);
   const [followersCount, setFollowersCount] = useState<number>(0);
   const [followingCount, setFollowingCount] = useState<number>(0);
+  const [editBio, setEditBio] = useState<string>(bio || '');
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -56,8 +60,19 @@ export default function ProfileHeader({
     }
   };
 
+  const handleBioSave = async () => {
+    try {
+      await updateUserBio(profileId, editBio);
+      setIsEditing(false);
+      // Optionally use window.location.reload() for a full page reload
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating bio:', error);
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center ">
+    <div className="flex flex-col items-center">
       {bannerUrl ? (
         <div className="w-full h-48 sm:h-64 bg-cover bg-center" style={{ backgroundImage: `url(${bannerUrl})` }} />
       ) : (
@@ -75,13 +90,39 @@ export default function ProfileHeader({
 
         <div className="mt-4 md:-mt-4 md:text-left px-5">
           <h1 className="text-2xl font-semibold">{username}</h1>
-          {bio && <p className="text-gray-600">{bio}</p>}
+          <p className="text-gray-600">
+            {bio}
+            {currentUserId === profileId && (
+              <Popover open={isEditing} onOpenChange={setIsEditing}>
+                <PopoverTrigger>
+                  <button className="ml-2 text-blue-500 hover:underline">
+                    <AiOutlineEdit className="w-5 h-5 inline" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <textarea
+                    value={editBio}
+                    onChange={(e) => setEditBio(e.target.value)}
+                    rows={4}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="Edit your bio"
+                  />
+                  <div className="flex justify-end mt-2">
+                    <Button onClick={handleBioSave} className="bg-blue-500 text-white">
+                      Save
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+          </p>
         </div>
 
         <ProfileHeaderData
           followersCount={followersCount}
           followingCount={followingCount}
-          loading={loading} 
+          loading={loading}
+          userId={currentUserId}
         />
 
         {/* Conditionally render the follow button based on the currentUserId and profileId */}
