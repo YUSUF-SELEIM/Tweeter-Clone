@@ -41,17 +41,17 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ userId, activeTab,setAc
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 w-full md:w-64 h-[10rem] md:sticky top-20 ">
-      <div className="flex flex-col items-center justify-center h-full">
+    <div className="bg-white shadow-md rounded-lg w-full md:w-64 h-[10rem] md:sticky top-20 ">
+      <div className="flex flex-col justify-center h-full w-full">
         <button
           onClick={() => handleTabChange('tweets')}
-          className={`py-2 px-4 font-medium ${activeTab === 'tweets' ? 'border-b-2 border-blue-500' : 'text-gray-500'}`}
+          className={`py-2 px-4 font-medium ${activeTab === 'tweets' ? 'border-l-4 border-blue-500' : 'text-gray-500'}`}
         >
           Tweets
         </button>
         <button
           onClick={() => handleTabChange('likes')}
-          className={`py-2 px-4 font-medium ${activeTab === 'likes' ? 'border-b-2 border-blue-500' : 'text-gray-500'}`}
+          className={`py-2 px-4 font-medium ${activeTab === 'likes' ? 'border-l-4 border-blue-500' : 'text-gray-500'}`}
         >
           Likes
         </button>
