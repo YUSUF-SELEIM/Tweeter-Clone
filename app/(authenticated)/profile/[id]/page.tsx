@@ -77,7 +77,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     {/* Layout with ProfileActions on the left on md+ screens */}
     <div className="flex flex-col justify-center md:flex-row mt-20 md:gap-8 mx-[5rem]">
       <ProfileActions
-        userId={authorId ?? ''}
+        userId={id}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         setTweets={setTweets}
