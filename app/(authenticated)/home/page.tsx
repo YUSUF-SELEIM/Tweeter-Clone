@@ -1,4 +1,4 @@
-'use client'; 
+'use client';
 
 import TweetForm from '@/components/TweetForm';
 import TweetCard from '@/components/TweetCard';
@@ -30,7 +30,9 @@ export default function Home() {
   }, []);
 
   if (loading) {
-    return <div className='flex w-full flex-col items-center justify-center h-[90vh]'><LoadingSpinner className={''} /></div>;
+    return <div className='flex w-full flex-col items-center justify-center h-[90vh]'>
+      <LoadingSpinner />
+    </div>;
   }
 
   return (
@@ -39,7 +41,7 @@ export default function Home() {
 
       <div className="w-full mt-6 space-y-8">
         {tweets.map((tweet) => (
-          <TweetCard key={tweet.id} tweet={tweet} authorId={authorId ?? ''}/>
+          <TweetCard key={tweet.id} tweet={tweet} authorId={authorId ?? ''} />
         ))}
       </div>
     </div>
