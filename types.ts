@@ -5,6 +5,7 @@ export interface Comment {
       imageUrl: string;
     };
     content: string;
+    createdAt: Date;
   }
   
   export interface Tweet {
