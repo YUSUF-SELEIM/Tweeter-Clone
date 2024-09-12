@@ -5,6 +5,8 @@ import { getUserInfo } from '@/lib/actions';
 import { LoadingSpinner } from '@/components/ui/spinner';
 import ProfileHeader from '@/components/ProfileHeader';
 import { useAuth } from "@/context/AuthContext";
+import ProfileActions from '@/components/ProfileActions';
+import TweetCard from '@/components/TweetCard';
 
 export default function ProfilePage({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -18,8 +20,11 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
   } | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingTweetsAndLikes, setLoadingTweetsAndLikes] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [activeTab, setActiveTab] = useState<'tweets' | 'likes'>('tweets');
+  const [tweets, setTweets] = useState<any[]>([]);
+  const [likes, setLikes] = useState<any[]>([]);
   useEffect(() => {
     const fetchUserInfo = async () => {
       setLoading(true);
@@ -59,6 +64,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
   if (error) return <div>{error}</div>;
 
   return (
+    <div>
     <ProfileHeader
       username={userInfo?.username || ''}
       bio={userInfo?.bio}
@@ -67,5 +73,41 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
       currentUserId={authorId ?? ''} // Pass the current user's ID from useAuth with a default value of an empty string
       profileId={id} // Pass the profile user's ID from URL
     />
+
+    {/* Layout with ProfileActions on the left on md+ screens */}
+    <div className="flex flex-col justify-center md:flex-row mt-20 md:gap-8 mx-[5rem]">
+      <ProfileActions
+        userId={authorId ?? ''}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        setTweets={setTweets}
+        setLikes={setLikes}
+        setLoadingTweetsAndLikes={setLoadingTweetsAndLikes}
+      />
+
+      {/* Display tweets or likes in the right column on larger screens */}
+      <div className="w-full md:w-2/3 mt-4 md:mt-0">
+        {loadingTweetsAndLikes ? (
+          <div className="w-full h-64 bg-gray-300 animate-pulse rounded-md" />
+        ) : (
+          <div>
+            {activeTab === 'tweets' ? (
+              tweets.length > 0 ? (
+                tweets.map(tweet => <TweetCard key={tweet.id} tweet={tweet} authorId={authorId ?? ''} />)
+              ) : (
+                <p>No tweets found.</p>
+              )
+            ) : (
+              likes.length > 0 ? (
+                likes.map(like => <TweetCard key={like.id} tweet={like} authorId={authorId ?? ''} />)
+              ) : (
+                <p>No likes found.</p>
+              )
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
   );
 }
