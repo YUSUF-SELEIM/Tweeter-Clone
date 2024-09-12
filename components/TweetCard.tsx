@@ -17,7 +17,7 @@ const TweetCard = forwardRef<HTMLDivElement, { tweet: Tweet, authorId: string }>
     };
 
     return (
-      <div ref={ref} className="w-full border rounded-lg p-4 bg-background">
+      <div ref={ref} className="w-full border rounded-lg p-4 bg-background mb-6">
         <div className="flex items-center mb-2 cursor-pointer" onClick={handleProfileClick}>
           <img
             src={tweet.author.imageUrl || `https://avatar.iran.liara.run/username?username=${tweet.author.username}`}
