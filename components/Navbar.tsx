@@ -78,7 +78,7 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-5 text-lg font-medium">
           <NavLink href="/home">Home</NavLink>
           <NavLink href="/explore">Explore</NavLink>
-          <NavLink href="/bookmarks">Bookmarks</NavLink>
+          <NavLink href={`/bookmarks/${authorId}`}>Bookmarks</NavLink>
         </nav>
 
         <div className="flex items-center gap-4">
@@ -142,10 +142,10 @@ export default function Navbar() {
             className={`transition-colors ${pathname === '/explore' ? 'text-blue-600' : 'text-muted-foreground'}`}
           />
         </Link>
-        <Link href="/bookmarks" className="flex flex-col items-center justify-center text-sm">
+        <Link href={`/bookmarks/${authorId}`} className="flex flex-col items-center justify-center text-sm">
           <AiFillBook
             size={24}
-            className={`transition-colors ${pathname === '/bookmarks' ? 'text-blue-600' : 'text-muted-foreground'}`}
+            className={`transition-colors ${pathname === `/bookmarks/${authorId}` ? 'text-blue-600' : 'text-muted-foreground'}`}
           />
         </Link>
       </nav>
