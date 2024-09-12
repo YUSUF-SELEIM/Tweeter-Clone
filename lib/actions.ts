@@ -261,3 +261,149 @@ export async function getNumberOfFollowing(userId: string) {
         }
     });
 }
+export async function getUserTweets(userId: string) {
+    return prisma.tweet.findMany({
+      where: {
+        authorId: userId
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            imageUrl: true,
+          },
+        },
+        comments: {
+          select: {
+            id: true,
+            author: {
+              select: {
+                id: true,
+                username: true,
+                imageUrl: true,
+              },
+            },
+            content: true,
+          },
+        },
+        likes: {
+          select: {
+            id: true,
+            userId: true,
+          },
+        },
+        retweets: true,  // We don't need the details of retweets here, just indicating the tweet can be retweeted.
+      },
+    });
+}
+export async function getUserRetweets(userId: string) {
+    return prisma.retweet.findMany({
+      where: {
+        userId: userId  // Only retweets made by this user
+      },
+      include: {
+        tweet: {
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            author: {
+              select: {
+                id: true,
+                username: true,
+                imageUrl: true,
+              },
+            },
+            comments: {
+              select: {
+                id: true,
+                author: {
+                  select: {
+                    id: true,
+                    username: true,
+                    imageUrl: true,
+                  },
+                },
+                content: true,
+              },
+            },
+            likes: {
+              select: {
+                id: true,
+                userId: true,
+              },
+            },
+            retweets: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+}
+export async function getUserTweetsAndRetweets(userId: string) {
+    const userTweets = await getUserTweets(userId);
+    const userRetweets = await getUserRetweets(userId);
+    
+    // Extract the tweets from the retweet objects
+    const retweetedTweets = userRetweets.map((retweet) => retweet.tweet);
+  
+    // Combine the user's tweets and retweeted tweets
+    const allTweets = [...userTweets, ...retweetedTweets];
+  
+    // Optionally, you can sort the combined array by createdAt if needed
+    allTweets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  
+    return allTweets;
+  }
+  
+export async function getUserLikedTweets(userId: string) {
+return prisma.tweet.findMany({
+    where: {
+    likes: {
+        some: {
+        userId: userId,  // Only get tweets that have been liked by the user
+        },
+    },
+    },
+    select: {
+    id: true,
+    content: true,
+    createdAt: true,
+    author: {
+        select: {
+        id: true,
+        username: true,
+        imageUrl: true,
+        },
+    },
+    comments: {
+        select: {
+        id: true,
+        content: true,
+        author: {
+            select: {
+            id: true,
+            username: true,
+            imageUrl: true,
+            },
+        },
+        },
+    },
+    likes: {
+        select: {
+        id: true,
+        userId: true,
+        },
+    },
+    retweets: {
+        select: {
+        id: true,
+        },
+    },
+    },
+});
+}
