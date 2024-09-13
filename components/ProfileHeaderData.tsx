@@ -25,7 +25,6 @@ const ProfileHeaderData: React.FC<ProfileHeaderDataProps> = ({ followersCount, f
       setLoadingFollowers(true);
       try {
         const data = await getUserFollowers(userId);
-        console.log('Fetched followers:', data);
         setFollowers(data);
       } catch (error) {
         console.error('Error fetching followers:', error);
