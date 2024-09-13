@@ -6,6 +6,7 @@ import Link from 'next/link';
 interface Follower {
   id: string;
   username: string;
+  bio: string | null;
   imageUrl?: string | null;
 }
 
@@ -13,10 +14,11 @@ interface ProfileHeaderDataProps {
   followersCount: number;
   followingCount: number;
   userId: string;
+  profileId:string;
   loading: boolean;
 }
 
-const ProfileHeaderData: React.FC<ProfileHeaderDataProps> = ({ followersCount, followingCount, userId, loading }) => {
+const ProfileHeaderData: React.FC<ProfileHeaderDataProps> = ({ followersCount, followingCount, userId, profileId,loading }) => {
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [loadingFollowers, setLoadingFollowers] = useState<boolean>(false);
 
@@ -24,7 +26,7 @@ const ProfileHeaderData: React.FC<ProfileHeaderDataProps> = ({ followersCount, f
     const fetchFollowers = async () => {
       setLoadingFollowers(true);
       try {
-        const data = await getUserFollowers(userId);
+        const data = await getUserFollowers(profileId);
         setFollowers(data);
       } catch (error) {
         console.error('Error fetching followers:', error);
@@ -77,10 +79,12 @@ const ProfileHeaderData: React.FC<ProfileHeaderDataProps> = ({ followersCount, f
                           <img
                             src={follower.imageUrl || `https://avatar.iran.liara.run/username?username=${follower.username}`}
                             alt={follower.username}
-                            className="w-8 h-8 rounded-full"
+                            className="w-10 h-10 rounded-full"
                           />
                           <div>
-                            <h3 className="font-semibold">{follower.username}</h3>
+                            <h3 className="font-medium">{follower.username}</h3>
+                            <h3 className="font-light text-gray-600 text-xs">{follower.bio}</h3>
+
                           </div>
                       </Link>
                     ))
