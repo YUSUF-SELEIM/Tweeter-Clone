@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from './ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 import { followUser, checkIfFollowing, getNumberOfFollowers, getNumberOfFollowing, updateUserBio } from '@/lib/actions';
@@ -14,14 +14,14 @@ interface ProfileHeaderProps {
   profileId: string;
 }
 
-export default function ProfileHeader({
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   username,
   bio,
   imageUrl,
   bannerUrl,
   currentUserId,
   profileId
-}: ProfileHeaderProps) {
+}) => {
   const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [followersCount, setFollowersCount] = useState<number>(0);
@@ -29,32 +29,33 @@ export default function ProfileHeader({
   const [editBio, setEditBio] = useState<string>(bio || '');
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
+  const fetchProfileData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [isFollowingStatus, followers, following] = await Promise.all([
+        checkIfFollowing(profileId, currentUserId),
+        getNumberOfFollowers(profileId),
+        getNumberOfFollowing(profileId)
+      ]);
+
+      setIsFollowing(isFollowingStatus);
+      setFollowersCount(followers);
+      setFollowingCount(following);
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [profileId, currentUserId]);
+
   useEffect(() => {
-    const fetchProfileData = async () => {
-      setLoading(true);
-      try {
-        const isFollowingStatus = await checkIfFollowing(profileId, currentUserId);
-        setIsFollowing(isFollowingStatus);
-
-        const followers = await getNumberOfFollowers(profileId);
-        const following = await getNumberOfFollowing(profileId);
-
-        setFollowersCount(followers);
-        setFollowingCount(following);
-      } catch (error) {
-        console.error('Error fetching profile data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfileData();
-  }, [currentUserId, profileId]);
+  }, [fetchProfileData]);
 
   const handleFollowClick = async () => {
     try {
       await followUser(profileId, currentUserId);
-      setIsFollowing(prev => prev === true ? false : true);
+      setIsFollowing(prev => !prev);
     } catch (error) {
       console.error('Error following/unfollowing user:', error);
     }
@@ -64,8 +65,8 @@ export default function ProfileHeader({
     try {
       await updateUserBio(profileId, editBio);
       setIsEditing(false);
-      // Optionally use window.location.reload() for a full page reload
-      window.location.reload();
+      // Refetch data to reflect bio changes
+      fetchProfileData();
     } catch (error) {
       console.error('Error updating bio:', error);
     }
@@ -73,12 +74,11 @@ export default function ProfileHeader({
 
   return (
     <div className="flex flex-col items-center">
-      {bannerUrl ? (
-        <div className="w-full h-48 sm:h-64 bg-cover bg-center" style={{ backgroundImage: `url(${bannerUrl})` }} />
-      ) : (
-        <div className="w-full h-48 sm:h-64 bg-cover bg-center" style={{ backgroundImage: `url(https://random.imagecdn.app/2000/300)` }} />
-      )}
-
+      <div
+        className="w-full h-48 sm:h-64 bg-cover bg-center"
+        style={{ backgroundImage: `url(${bannerUrl || 'https://random.imagecdn.app/2000/300'})` }}
+      />
+      
       <div className="relative flex flex-col md:flex-row justify-center md:justify-between items-center bg-white w-[80%] -mt-12 shadow-lg pb-12 rounded-lg p-5">
         <div className="relative -mt-16">
           <img
@@ -123,9 +123,9 @@ export default function ProfileHeader({
           followingCount={followingCount}
           loading={loading}
           userId={currentUserId}
+          profileId={profileId}
         />
 
-        {/* Conditionally render the follow button based on the currentUserId and profileId */}
         {currentUserId !== profileId && (
           <div className="mt-4 md:-mt-4 md:ml-auto">
             {loading ? (
@@ -143,4 +143,6 @@ export default function ProfileHeader({
       </div>
     </div>
   );
-}
+};
+
+export default ProfileHeader;
