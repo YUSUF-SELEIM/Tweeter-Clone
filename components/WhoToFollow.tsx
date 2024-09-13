@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { getAllUsers, followUser, checkIfFollowing } from '@/lib/actions';
 import Image from 'next/image';
 import { Button } from './ui/button';
@@ -15,6 +16,7 @@ export default function WhoToFollow() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const { authorId } = useAuth();
+    const router = useRouter();
 
     const [followingState, setFollowingState] = useState<Record<string, boolean>>({});
 
@@ -26,7 +28,6 @@ export default function WhoToFollow() {
 
                 // Exclude the current user from the list
                 const filteredUsers = fetchedUsers.filter(user => user.id !== authorId);
-                setUsers(filteredUsers);
 
                 // Check if the current user is following any of the remaining users
                 const followingStatusPromises = filteredUsers.map(user =>
@@ -40,6 +41,7 @@ export default function WhoToFollow() {
                     return acc;
                 }, {} as Record<string, boolean>);
 
+                setUsers(filteredUsers);
                 setFollowingState(updatedFollowingState);
             } catch (error) {
                 console.error('Error fetching users:', error);
@@ -65,6 +67,10 @@ export default function WhoToFollow() {
         }
     };
 
+    const handleUserClick = (userId: string) => {
+        router.push(`/profile/${userId}`); // Navigate to the user's profile
+    };
+
     return (
         <div className="top-20 w-full md:w-64 bg-white shadow-lg rounded-lg p-4 mt-8">
             <h2 className="text-xl font-semibold mb-4">Who to follow</h2>
@@ -73,7 +79,11 @@ export default function WhoToFollow() {
             ) : (
                 <div className="space-y-4">
                     {users.slice(0, 3).map(user => (
-                        <div key={user.id} className="flex items-center justify-between">
+                        <div
+                            key={user.id}
+                            className="flex items-center justify-between cursor-pointer"
+                            onClick={() => handleUserClick(user.id)}
+                        >
                             <div className="flex items-center space-x-3">
                                 <Image
                                     src={user.imageUrl || `https://avatar.iran.liara.run/username?username=${user.username}`}
@@ -84,14 +94,17 @@ export default function WhoToFollow() {
                                 />
                                 <div>
                                     <h1 className="font-medium text-left">{user.username}</h1>
-                                    <p className="text-gray-600 text-[0.6rem] ">
+                                    <p className="text-gray-600 text-[0.6rem]">
                                         {user.bio}
                                     </p>
                                 </div>
                             </div>
                             <Button
                                 className={`text-sm mt-2 px-2 py-2 rounded-lg ${followingState[user.id] ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}
-                                onClick={() => handleFollowClick(user.id)}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent triggering the user click event
+                                    handleFollowClick(user.id);
+                                }}
                             >
                                 {followingState[user.id] ? 'Unfollow' : 'Follow'}
                             </Button>
