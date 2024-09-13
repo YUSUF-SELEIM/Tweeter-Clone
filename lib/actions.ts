@@ -495,3 +495,14 @@ export async function updateUserBio(userId: string, newBio: string) {
     throw new Error('Failed to update bio');
   }
 }
+
+export async function getAllUsers() {
+  return prisma.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      bio: true,
+      imageUrl: true,
+    },
+  });
+}
