@@ -7,7 +7,7 @@ interface ProfileActionsProps {
   setLikes: React.Dispatch<React.SetStateAction<unknown[]>>;
   setActiveTab: React.Dispatch<React.SetStateAction<'tweets' | 'likes'>>;
   activeTab: 'tweets' | 'likes';
-  setLoadingTweetsAndLikes: React.Dispatch<React.SetStateAction<boolean>>; // Fixed type
+  setLoadingTweetsAndLikes: React.Dispatch<React.SetStateAction<boolean>>; 
 }
 
 const ProfileActions: React.FC<ProfileActionsProps> = ({ userId, activeTab, setActiveTab, setTweets, setLikes, setLoadingTweetsAndLikes }) => {
