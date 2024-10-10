@@ -1,16 +1,18 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const { authorId,content, imageUrl } = await req.json();
+  const { authorId, content, imageUrl } = await req.json();
   if (!content || !authorId) {
-    return NextResponse.json({ error: 'Content and authorId are required' }, { status: 400 });
+    return NextResponse.json(
+      { error: "Content and authorId are required" },
+      { status: 400 }
+    );
   }
 
   try {
     const tweet = await prisma.tweet.create({
       data: {
-     
         content,
         imageUrl: imageUrl || null, // Image is optional
         authorId,
@@ -18,9 +20,12 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(tweet, { status: 200 });
-  } catch (error) { 
-     console.error('Error creating tweet:', error); 
-    return NextResponse.json({ error: 'Failed to create tweet' }, { status: 500 });
+  } catch (error) {
+    console.error("Error creating tweet:", error);
+    return NextResponse.json(
+      { error: "Failed to create tweet" },
+      { status: 500 }
+    );
   }
 }
 
@@ -51,13 +56,17 @@ export async function GET() {
         likes: true,
         retweets: true,
       },
+      orderBy: {
+        createdAt: "desc", 
+      },
     });
-    
-    
 
     return NextResponse.json(tweets, { status: 200 });
   } catch (error) {
-    console.error('Error fetching tweets:', error);
-    return NextResponse.json({ error: 'Failed to fetch tweets' }, { status: 500 });
+    console.error("Error fetching tweets:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch tweets" },
+      { status: 500 }
+    );
   }
 }
