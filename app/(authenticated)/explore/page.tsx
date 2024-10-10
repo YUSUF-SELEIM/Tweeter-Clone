@@ -50,7 +50,7 @@ export default function Explore() {
 
     return (
         <div className="flex justify-between w-full px-2 py-4 md:px-24 bg-[#F2F2F2]">
-            <div className="bg-white shadow-md rounded-lg h-[10rem] top-20 hidden md:block w-2/5 mr-8">
+            <div className="sticky bg-white shadow-md rounded-lg h-[10rem] top-20 hidden md:block w-2/5 mr-8">
                 <div className="flex flex-col justify-center h-full">
                     <button
                         className="text-left py-2 px-4 font-medium  border-l-4 border-blue-500"
