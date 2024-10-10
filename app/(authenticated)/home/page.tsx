@@ -45,7 +45,7 @@ export default function Home() {
         ))}
       </div>
 
-   <div className="h-full sticky hidden md:block w-2/5 ml-8">
+   <div className="h-full sticky top-20 hidden md:block w-2/5 ml-8">
         <Trends />
         <WhoToFollow />
     </div>
