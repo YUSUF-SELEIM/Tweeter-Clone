@@ -1,7 +1,11 @@
-'use server';
-import { prisma } from '@/lib/prisma';
+"use server";
+import { prisma } from "@/lib/prisma";
 
-export async function comment(content: string, tweetId: string, authorId: string) {
+export async function comment(
+  content: string,
+  tweetId: string,
+  authorId: string
+) {
   return prisma.comment.create({
     data: {
       content,
@@ -15,24 +19,24 @@ export async function like(tweetId: string, userId: string) {
   const existingLike = await prisma.like.findFirst({
     where: {
       tweetId,
-      userId
-    }
+      userId,
+    },
   });
 
   if (existingLike) {
     // If the like exists, remove it
     return prisma.like.delete({
       where: {
-        id: existingLike.id
-      }
+        id: existingLike.id,
+      },
     });
   } else {
     // If the like does not exist, create it
     return prisma.like.create({
       data: {
         tweetId,
-        userId
-      }
+        userId,
+      },
     });
   }
 }
@@ -92,8 +96,8 @@ export async function getLikeStatus(tweetId: string, userId: string) {
   const existingLike = await prisma.like.findFirst({
     where: {
       tweetId,
-      userId
-    }
+      userId,
+    },
   });
 
   return !!existingLike; // Return true if a like exists, otherwise false
@@ -103,20 +107,19 @@ export async function getRetweetStatus(tweetId: string, userId: string) {
   const existingRetweet = await prisma.retweet.findFirst({
     where: {
       tweetId,
-      userId
-    }
+      userId,
+    },
   });
 
   return !!existingRetweet; // Return true if a retweet exists, otherwise false
 }
 
-
 export async function getSaveTweetStatus(tweetId: string, userId: string) {
   const existingSavedTweet = await prisma.saveTweet.findFirst({
     where: {
       tweetId,
-      userId
-    }
+      userId,
+    },
   });
 
   return !!existingSavedTweet; // Return true if the tweet is saved, otherwise false
@@ -170,41 +173,44 @@ export async function likeAComment(commentId: string, userId: string) {
   const existingLike = await prisma.commentLike.findFirst({
     where: {
       commentId,
-      userId
-    }
+      userId,
+    },
   });
 
   if (existingLike) {
     // If the like exists, remove it
     return prisma.commentLike.delete({
       where: {
-        id: existingLike.id
-      }
+        id: existingLike.id,
+      },
     });
   } else {
     // If the like does not exist, create it
     return prisma.commentLike.create({
       data: {
         commentId,
-        userId
-      }
+        userId,
+      },
     });
   }
 }
 export async function getCommentLikes(commentId: string) {
   return prisma.commentLike.count({
     where: {
-      commentId
-    }
+      commentId,
+    },
   });
 }
 
-export async function getLikeStatusOfComment(commentId: string, userId: string) {
+export async function getLikeStatusOfComment(
+  commentId: string,
+  userId: string
+) {
   const existingLike = await prisma.commentLike.findFirst({
     where: {
       commentId,
-      userId
-    }
+      userId,
+    },
   });
 
   return !!existingLike; // Return true if a like exists, otherwise false
@@ -213,43 +219,45 @@ export async function getLikeStatusOfComment(commentId: string, userId: string) 
 export async function getUserInfo(userId: string) {
   return prisma.user.findUnique({
     where: {
-      id: userId
-    }
+      id: userId,
+    },
   });
 }
 export async function followUser(followingId: string, followerId: string) {
   const existingFollow = await prisma.follow.findFirst({
     where: {
-      followingId: followingId,//followingId: The ID of the user to be followed.
-      followerId: followerId //followerId: The ID of the user performing the follow action.
-
-    }
+      followingId: followingId, //followingId: The ID of the user to be followed.
+      followerId: followerId, //followerId: The ID of the user performing the follow action.
+    },
   });
 
   if (existingFollow) {
     // If the follow exists, remove it
     return prisma.follow.delete({
       where: {
-        id: existingFollow.id
-      }
+        id: existingFollow.id,
+      },
     });
   } else {
     // If the follow does not exist, create it
     return prisma.follow.create({
       data: {
         followingId: followingId,
-        followerId: followerId
-      }
+        followerId: followerId,
+      },
     });
   }
 }
 
-export async function checkIfFollowing(followingId: string, followerId: string) {
+export async function checkIfFollowing(
+  followingId: string,
+  followerId: string
+) {
   const existingFollow = await prisma.follow.findFirst({
     where: {
       followingId,
-      followerId
-    }
+      followerId,
+    },
   });
 
   return !!existingFollow; // Return true if a follow exists, otherwise false
@@ -258,22 +266,22 @@ export async function checkIfFollowing(followingId: string, followerId: string) 
 export async function getNumberOfFollowers(userId: string) {
   return prisma.follow.count({
     where: {
-      followingId: userId
-    }
+      followingId: userId,
+    },
   });
 }
 
 export async function getNumberOfFollowing(userId: string) {
   return prisma.follow.count({
     where: {
-      followerId: userId
-    }
+      followerId: userId,
+    },
   });
 }
 export async function getUserTweets(userId: string) {
   return prisma.tweet.findMany({
     where: {
-      authorId: userId
+      authorId: userId,
     },
     include: {
       author: {
@@ -302,14 +310,14 @@ export async function getUserTweets(userId: string) {
           userId: true,
         },
       },
-      retweets: true,  // We don't need the details of retweets here, just indicating the tweet can be retweeted.
+      retweets: true, // We don't need the details of retweets here, just indicating the tweet can be retweeted.
     },
   });
 }
 export async function getUserRetweets(userId: string) {
   return prisma.retweet.findMany({
     where: {
-      userId: userId  // Only retweets made by this user
+      userId: userId, // Only retweets made by this user
     },
     include: {
       tweet: {
@@ -364,7 +372,9 @@ export async function getUserTweetsAndRetweets(userId: string) {
   const allTweets = [...userTweets, ...retweetedTweets];
 
   // Optionally, you can sort the combined array by createdAt if needed
-  allTweets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  allTweets.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
   return allTweets;
 }
@@ -374,7 +384,7 @@ export async function getUserLikedTweets(userId: string) {
     where: {
       likes: {
         some: {
-          userId: userId,  // Only get tweets that have been liked by the user
+          userId: userId, // Only get tweets that have been liked by the user
         },
       },
     },
@@ -415,8 +425,8 @@ export async function getUserLikedTweets(userId: string) {
       },
     },
   });
-
-} export async function getUserSavedTweets(userId: string) {
+}
+export async function getUserSavedTweets(userId: string) {
   try {
     return prisma.tweet.findMany({
       where: {
@@ -464,8 +474,8 @@ export async function getUserLikedTweets(userId: string) {
       },
     });
   } catch (error) {
-    console.error('Error fetching user saved tweets:', error);
-    throw new Error('Failed to fetch saved tweets');
+    console.error("Error fetching user saved tweets:", error);
+    throw new Error("Failed to fetch saved tweets");
   }
 }
 export async function getUserFollowers(userId: string) {
@@ -477,11 +487,11 @@ export async function getUserFollowers(userId: string) {
     });
 
     // Extract and return the follower user data
-    const followers = followRecords.map(record => record.follower);
+    const followers = followRecords.map((record) => record.follower);
     return followers;
   } catch (error) {
-    console.error('Error fetching user followers:', error);
-    throw new Error('Failed to fetch user followers');
+    console.error("Error fetching user followers:", error);
+    throw new Error("Failed to fetch user followers");
   }
 }
 export async function updateUserBio(userId: string, newBio: string) {
@@ -491,8 +501,8 @@ export async function updateUserBio(userId: string, newBio: string) {
       data: { bio: newBio },
     });
   } catch (error) {
-    console.error('Error updating user bio:', error);
-    throw new Error('Failed to update bio');
+    console.error("Error updating user bio:", error);
+    throw new Error("Failed to update bio");
   }
 }
 
