@@ -72,7 +72,7 @@ export default function WhoToFollow() {
     };
 
     return (
-        <div className="top-20 w-full md:w-64 bg-white shadow-lg rounded-lg p-4 mt-8">
+        <div className="top-20 sticky w-full md:w-64 bg-white shadow-lg rounded-lg p-4 mt-8">
             <h2 className="text-xl font-semibold mb-4">Who to follow</h2>
             {loading ? (
                 <div className="text-center">Loading...</div>
