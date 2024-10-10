@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<p align="center">
+  <img src="/public/images/logo.png" />
+</p>
 
-## Getting Started
+# Tweeter
 
-First, run the development server:
+Tweeter is a Twitter clone built using modern web technologies like Next.js, Prisma, MongoDB, and Shadcn for UI components.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This project replicates core functionalities of Twitter, allowing users to sign up, post tweets follow other users, and add comments.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- User Authentication (Sign up, Log in)
+- Tweeting functionality (Post, Delete)
+- Like and Retweet system
+- Follow and unfollow users
+- Real-time updates on tweets and interactions
+- Responsive design for both desktop and mobile devices
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tech Stack
 
-## Learn More
+- **Next.js**: Framework for building server-side rendered React applications.
+- **Prisma**: ORM for handling database operations and schema management.
+- **MongoDB**: Database used to store user information, tweets, and interactions.
+- **Shadcn**: UI component library to create a beautiful and accessible interface.
 
-To learn more about Next.js, take a look at the following resources:
+# Usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Create an account or log in with your existing credentials.
+- Post tweets, like others' tweets, and engage in discussions.
+- Follow other users to see their tweets in your feed.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Credits
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<div> Icons made by <a href="https://www.flaticon.com/authors/delwar018" title="Delwar018"> Delwar018 </a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com'</a></div>
