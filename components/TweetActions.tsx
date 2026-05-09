@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+"use client";
+
+import { useState, useCallback } from 'react';
 import { AiOutlineComment, AiOutlineRetweet, AiOutlineHeart, AiOutlineStar } from 'react-icons/ai';
 import { Separator } from './ui/separator';
 import { Skeleton } from './ui/skeleton'; 
-import { like, retweet, saveTweet, getLikeStatus, getRetweetStatus, getSaveTweetStatus } from '@/lib/actions'; 
+import { like, retweet, saveTweet } from '@/lib/actions'; 
 
 export default function TweetActions({ setShowComments, tweetId, authorId }: { setShowComments: React.Dispatch<React.SetStateAction<boolean>>; tweetId: string; authorId: string }) {
   const [statuses, setStatuses] = useState({
@@ -10,28 +12,7 @@ export default function TweetActions({ setShowComments, tweetId, authorId }: { s
     retweeted: false,
     saved: false,
   });
-  const [loading, setLoading] = useState(true);
-
-  // Concurrently fetch the initial like, retweet, and save statuses
-  const fetchInitialState = useCallback(async () => {
-    try {
-      const [isLiked, isRetweeted, isSaved] = await Promise.all([
-        getLikeStatus(tweetId, authorId),
-        getRetweetStatus(tweetId, authorId),
-        getSaveTweetStatus(tweetId, authorId),
-      ]);
-      
-      setStatuses({ liked: isLiked, retweeted: isRetweeted, saved: isSaved });
-    } catch (error) {
-      console.error('Error fetching initial state:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [tweetId, authorId]);
-
-  useEffect(() => {
-    fetchInitialState();
-  }, [fetchInitialState]);
+  const [loading] = useState(false);
 
   const handleCommentClick = useCallback(() => {
     setShowComments(prev => !prev);

@@ -1,54 +1,84 @@
-'use client';
 import TweetForm from '@/components/TweetForm';
 import TweetCard from '@/components/TweetCard';
-import { useAuth } from '@/context/AuthContext';
-import { useEffect, useState } from 'react';
 import { Tweet } from '@/types';
-import { LoadingSpinner } from '@/components/ui/spinner';
 import Trends from '@/components/TrendsPanel';
 import WhoToFollow from '@/components/WhoToFollow';
+import { prisma } from '@/lib/prisma';
 
-export default function Home() {
-  const { authorId, loading } = useAuth();
-  const [tweets, setTweets] = useState<Tweet[]>([]);
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-  useEffect(() => {
-    const fetchTweets = async () => {
-      try {
-        const response = await fetch('/api/tweet');
-        if (response.ok) {
-          const tweetsData = await response.json();
-          setTweets(tweetsData);
-        } else {
-          console.error('Failed to fetch tweets');
-        }
-      } catch (error) {
-        console.error('Error fetching tweets:', error);
-      }
-    };
+export default async function Home() {
+  // Server-side fetch of tweets using Prisma (no useEffect)
+  const tweetsRaw = await prisma.tweet.findMany({
+    include: {
+      author: {
+        select: {
+          id: true,
+          username: true,
+          imageUrl: true,
+        },
+      },
+      comments: {
+        select: {
+          id: true,
+          author: {
+            select: {
+              id: true,
+              username: true,
+              imageUrl: true,
+            },
+          },
+          content: true,
+          createdAt: true,
+        },
+      },
+      likes: true,
+      retweets: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
 
-    fetchTweets();
-  }, []);
-
-  if (loading) {
-    return <div className='flex w-full flex-col items-center justify-center h-[90vh]'>
-      <LoadingSpinner />
-    </div>;
-  }
+  const tweets: Tweet[] = tweetsRaw.map((t) => ({
+    id: t.id,
+    content: t.content,
+    imageUrl: t.imageUrl ?? undefined,
+    author: {
+      id: t.author.id,
+      username: t.author.username,
+      imageUrl: t.author.imageUrl ?? undefined,
+    },
+    likes: Array.isArray(t.likes) ? t.likes.length : 0,
+    retweets: Array.isArray(t.retweets) ? t.retweets.length : 0,
+    comments: Array.isArray(t.comments) ? t.comments.length : 0,
+    commentsList: (t.comments || []).map((c) => ({
+      id: c.id,
+      user: {
+        username: c.author.username,
+        imageUrl: c.author.imageUrl || 'https://via.placeholder.com/40',
+      },
+      content: c.content,
+      createdAt: c.createdAt,
+    })),
+    createdAt: t.createdAt.toISOString(),
+  }));
 
   return (
     <div className="flex justify-between w-full px-2 py-4 md:px-24 bg-[##F2F2F2]">
       <div className="w-full space-y-8">
-        {authorId && <TweetForm authorId={authorId} />}
+        <TweetForm />
         {tweets.map((tweet) => (
-          <TweetCard key={tweet.id} tweet={tweet} authorId={authorId ?? ''} />
+          <TweetCard key={tweet.id} tweet={tweet} authorId={""} />
         ))}
       </div>
 
-   <div className="h-full sticky top-20 hidden md:block w-2/5 ml-8">
+      <div className="h-full sticky top-20 hidden md:block w-2/5 ml-8">
         <Trends />
-        <WhoToFollow />
-    </div>
+        {/* Fetch users on the server and pass into the WhoToFollow component */}
+        <WhoToFollow users={(await prisma.user.findMany({ select: { id: true, username: true, bio: true, imageUrl: true } })).filter(u => u.id !== '')} initialFollowingState={{}} />
+      </div>
     </div>
   );
 }

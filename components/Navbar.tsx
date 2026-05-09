@@ -19,9 +19,6 @@ import {
   AiOutlineLogout,
 } from "react-icons/ai";
 import { useAuth } from "@/context/AuthContext";
-import { getUserInfo } from "@/lib/actions";
-import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 
 function NavLink({
@@ -48,27 +45,10 @@ function NavLink({
 }
 
 export default function Navbar() {
-  const [username, setUsername] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const { authorId } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [fetching, setFetching] = useState(true);
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (authorId) {
-        setFetching(true); // Start fetching
-        const data = await getUserInfo(authorId);
-        if (data) {
-          setUsername(data.username);
-          setImageUrl(data.imageUrl);
-        }
-        setFetching(false); // End fetching
-      }
-    };
-    fetchUserInfo();
-  }, [authorId]);
+  const avatarUrl = `https://avatar.iran.liara.run/username?username=${authorId ?? 'user'}`;
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -103,18 +83,7 @@ export default function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
-                {fetching ? (
-                  <Skeleton className="w-8 h-8 rounded-full" />
-                ) : (
-                  <img
-                    src={
-                      imageUrl ||
-                      `https://avatar.iran.liara.run/username?username=${username}`
-                    }
-                    alt="User avatar"
-                    className="w-8 h-8 rounded-full"
-                  />
-                )}
+                <img src={avatarUrl} alt="User avatar" className="w-8 h-8 rounded-full" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="px-4 py-2 ">
@@ -123,9 +92,7 @@ export default function Navbar() {
                 onSelect={() => router.push(`/profile/${authorId}`)}
               >
                 <AiOutlineUser size={16} />
-                <span>
-                  {fetching ? <Skeleton className="w-20 h-4" /> : "My Profile"}
-                </span>
+                <span>My Profile</span>
               </DropdownMenuItem>
 
               <DropdownMenuItem className="flex items-center gap-2 px-3 py-2">

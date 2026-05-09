@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { getUserFollowers } from '@/lib/actions';
+"use client";
+
+import React from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import Link from 'next/link';
 
@@ -13,32 +14,11 @@ interface Follower {
 interface ProfileHeaderDataProps {
   followersCount: number;
   followingCount: number;
-  userId: string;
-  profileId:string;
   loading: boolean;
+  followers?: Follower[];
 }
-
-const ProfileHeaderData: React.FC<ProfileHeaderDataProps> = ({ followersCount, followingCount, userId, profileId,loading }) => {
-  const [followers, setFollowers] = useState<Follower[]>([]);
-  const [loadingFollowers, setLoadingFollowers] = useState<boolean>(false);
-
-  useEffect(() => {
-    const fetchFollowers = async () => {
-      setLoadingFollowers(true);
-      try {
-        const data = await getUserFollowers(profileId);
-        setFollowers(data);
-      } catch (error) {
-        console.error('Error fetching followers:', error);
-      } finally {
-        setLoadingFollowers(false);
-      }
-    };
-
-    if (userId) {
-      fetchFollowers();
-    }
-  }, [userId]);
+const ProfileHeaderData: React.FC<ProfileHeaderDataProps> = ({ followersCount, followingCount, loading, followers = [] }) => {
+  const loadingFollowers = false;
 
   return (
     <div className="flex justify-center items-center space-x-4 mt-4 md:-mt-4 md:mx-auto">

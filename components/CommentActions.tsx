@@ -1,32 +1,14 @@
-import { useState, useEffect } from 'react';
-import { likeAComment, getLikeStatusOfComment, getCommentLikes } from '@/lib/actions';
+"use client";
+
+import { useState } from 'react';
+import { likeAComment } from '@/lib/actions';
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai'; 
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function CommentActions({ commentId, authorId }: { commentId: string, authorId: string }) {
-  const [likes, setLikes] = useState<number>(0);
-  const [liked, setLiked] = useState<boolean>(false);
+export default function CommentActions({ commentId, authorId, initialLikes = 0, initialLiked = false }: { commentId: string, authorId: string, initialLikes?: number, initialLiked?: boolean }) {
+  const [likes, setLikes] = useState<number>(initialLikes);
+  const [liked, setLiked] = useState<boolean>(initialLiked);
   const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [likeStatus, likesCount] = await Promise.all([
-          getLikeStatusOfComment(commentId, authorId),
-          getCommentLikes(commentId)
-        ]);
-        setLiked(likeStatus);
-        setLikes(likesCount);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [commentId, authorId]);
 
   const handleLikeClick = async () => {
     setLoading(true);

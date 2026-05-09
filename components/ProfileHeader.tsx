@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
-import { followUser, checkIfFollowing, getNumberOfFollowers, getNumberOfFollowing, updateUserBio } from '@/lib/actions';
 import ProfileHeaderData from './ProfileHeaderData';
 import { AiOutlineEdit } from "react-icons/ai";
+import { updateUserBio } from '@/lib/actions';
 
 interface ProfileHeaderProps {
   username: string;
@@ -12,6 +14,9 @@ interface ProfileHeaderProps {
   bannerUrl?: string;
   currentUserId: string;
   profileId: string;
+  isFollowing?: boolean | null;
+  followersCount?: number;
+  followingCount?: number;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -20,42 +25,19 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   imageUrl,
   bannerUrl,
   currentUserId,
-  profileId
+  profileId,
+  isFollowing = null,
+  followersCount = 0,
+  followingCount = 0,
 }) => {
-  const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [followersCount, setFollowersCount] = useState<number>(0);
-  const [followingCount, setFollowingCount] = useState<number>(0);
+  const [localIsFollowing, setLocalIsFollowing] = useState<boolean | null>(isFollowing);
   const [editBio, setEditBio] = useState<string>(bio || '');
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  const fetchProfileData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [isFollowingStatus, followers, following] = await Promise.all([
-        checkIfFollowing(profileId, currentUserId),
-        getNumberOfFollowers(profileId),
-        getNumberOfFollowing(profileId)
-      ]);
-
-      setIsFollowing(isFollowingStatus);
-      setFollowersCount(followers);
-      setFollowingCount(following);
-    } catch (error) {
-      console.error('Error fetching profile data:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [profileId, currentUserId]);
-
-  useEffect(() => {
-    fetchProfileData();
-  }, [fetchProfileData]);
-
   const handleFollowClick = async () => {
     try {
-      await followUser(profileId, currentUserId);
-      setIsFollowing(prev => !prev);
+      await fetch('/api/follow', { method: 'POST', body: JSON.stringify({ followingId: profileId, followerId: currentUserId }) });
+      setLocalIsFollowing(prev => !prev);
     } catch (error) {
       console.error('Error following/unfollowing user:', error);
     }
@@ -65,8 +47,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     try {
       await updateUserBio(profileId, editBio);
       setIsEditing(false);
-      // Refetch data to reflect bio changes
-      fetchProfileData();
     } catch (error) {
       console.error('Error updating bio:', error);
     }
@@ -121,23 +101,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <ProfileHeaderData
           followersCount={followersCount}
           followingCount={followingCount}
-          loading={loading}
-          userId={currentUserId}
-          profileId={profileId}
+          loading={false}
         />
 
         {currentUserId !== profileId && (
           <div className="mt-4 md:-mt-4 md:ml-auto">
-            {loading ? (
-              <div className="w-24 h-8 bg-gray-300 animate-pulse rounded-lg" />
-            ) : (
-              <Button
-                onClick={handleFollowClick}
-                className={`px-4 py-2 rounded-lg ${isFollowing ? 'bg-red-500' : 'bg-blue-500'} text-white`}
-              >
-                {isFollowing ? 'Unfollow' : 'Follow'}
-              </Button>
-            )}
+            <Button
+              onClick={handleFollowClick}
+              className={`px-4 py-2 rounded-lg ${localIsFollowing ? 'bg-red-500' : 'bg-blue-500'} text-white`}
+            >
+              {localIsFollowing ? 'Unfollow' : 'Follow'}
+            </Button>
           </div>
         )}
       </div>

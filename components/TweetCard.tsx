@@ -1,3 +1,5 @@
+"use client";
+
 import { format } from 'date-fns';
 import { Tweet } from '@/types';
 import CommentsSection from './CommentsSection';
@@ -6,9 +8,12 @@ import TweetData from './TweetData';
 import { useState, forwardRef, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import LazyLoad from 'react-lazyload';
+import { useAuth } from '@/context/AuthContext';
 
 const TweetCard = forwardRef<HTMLDivElement, { tweet: Tweet; authorId: string }>(
   ({ tweet, authorId }, ref) => {
+    const { authorId: contextAuthorId } = useAuth();
+    const resolvedAuthorId = authorId || contextAuthorId || '';
     const [showComments, setShowComments] = useState(false);
     const router = useRouter();
 
@@ -53,9 +58,9 @@ const TweetCard = forwardRef<HTMLDivElement, { tweet: Tweet; authorId: string }>
           </LazyLoad>
         )}
 
-        <TweetActions setShowComments={setShowComments} tweetId={tweet.id} authorId={authorId} />
-        <TweetData tweetId={tweet.id} />
-        <CommentsSection tweetId={tweet.id} authorId={authorId} showComments={showComments} />
+        <TweetActions setShowComments={setShowComments} tweetId={tweet.id} authorId={resolvedAuthorId} />
+        <TweetData tweet={tweet} />
+        <CommentsSection tweetId={tweet.id} authorId={resolvedAuthorId} showComments={showComments} initialComments={tweet.commentsList} />
       </div>
     );
   }

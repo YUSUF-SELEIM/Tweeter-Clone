@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+"use client";
+
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAllUsers, followUser, checkIfFollowing } from '@/lib/actions';
 import Image from 'next/image';
 import { Button } from './ui/button';
 import { useAuth } from '@/context/AuthContext';
@@ -12,52 +13,17 @@ interface User {
     imageUrl?: string | null;
 }
 
-export default function WhoToFollow() {
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+export default function WhoToFollow({ users = [], initialFollowingState = {} as Record<string, boolean> }: { users?: User[]; initialFollowingState?: Record<string, boolean> }) {
     const { authorId } = useAuth();
     const router = useRouter();
 
-    const [followingState, setFollowingState] = useState<Record<string, boolean>>({});
-
-    useEffect(() => {
-        const fetchUsers = async () => {
-            setLoading(true);
-            try {
-                const fetchedUsers = await getAllUsers();
-
-                // Exclude the current user from the list
-                const filteredUsers = fetchedUsers.filter(user => user.id !== authorId);
-
-                // Check if the current user is following any of the remaining users
-                const followingStatusPromises = filteredUsers.map(user =>
-                    checkIfFollowing(user.id, authorId ?? '')
-                );
-                const followingStatuses = await Promise.all(followingStatusPromises);
-
-                // Set following states for users
-                const updatedFollowingState = filteredUsers.reduce((acc, user, index) => {
-                    acc[user.id] = followingStatuses[index];
-                    return acc;
-                }, {} as Record<string, boolean>);
-
-                setUsers(filteredUsers);
-                setFollowingState(updatedFollowingState);
-            } catch (error) {
-                console.error('Error fetching users:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (authorId) {
-            fetchUsers();
-        }
-    }, [authorId]);
+    const [followingState, setFollowingState] = useState<Record<string, boolean>>(initialFollowingState);
+    const loading = false;
 
     const handleFollowClick = async (userId: string) => {
         try {
-            await followUser(userId, authorId ?? '');
+            // Call server action or API to toggle follow - placeholder
+            await fetch('/api/follow', { method: 'POST', body: JSON.stringify({ userId, followerId: authorId }) });
             setFollowingState(prevState => ({
                 ...prevState,
                 [userId]: !prevState[userId],

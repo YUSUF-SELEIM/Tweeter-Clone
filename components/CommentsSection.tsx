@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+"use client";
+
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Comment } from "@/types";
-import { comment, getTweetComments } from "@/lib/actions";
+import { comment } from "@/lib/actions";
 import { format } from "date-fns";
 import CommentActions from "./CommentActions";
 
@@ -10,45 +12,19 @@ export default function CommentsSection({
   tweetId,
   authorId,
   showComments,
+  initialComments = [],
 }: {
   tweetId: string;
   authorId: string;
   showComments: boolean;
+  initialComments?: Comment[];
 }) {
   const [newComment, setNewComment] = useState("");
-  const [commentsList, setCommentsList] = useState<Comment[]>([]);
+  const [commentsList, setCommentsList] = useState<Comment[]>(initialComments);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const commentsRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const fetchComments = async () => {
-      if (!showComments) return;
-
-      setLoading(true);
-      setError(null);
-      try {
-        const comments = await getTweetComments(tweetId);
-        const commentsWithUser = comments.map((comment) => ({
-          ...comment,
-          user: {
-            username: comment.author.username,
-            imageUrl:
-              comment.author.imageUrl || "https://via.placeholder.com/40",
-          },
-        }));
-        setCommentsList(commentsWithUser);
-      } catch (err) {
-        setError("Error fetching comments. Please try again later.");
-        console.error("Error fetching comments:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchComments();
-  }, [tweetId, showComments]);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewComment(e.target.value);
@@ -66,16 +42,17 @@ export default function CommentsSection({
       await comment(newComment, tweetId, authorId);
       setNewComment("");
 
-      // Refetch comments to update the list
-      const updatedComments = await getTweetComments(tweetId);
-      const commentsWithUser = updatedComments.map((comment) => ({
-        ...comment,
-        user: {
-          username: comment.author.username,
-          imageUrl: comment.author.imageUrl || "https://via.placeholder.com/40",
-        },
-      }));
-      setCommentsList(commentsWithUser);
+      // Append the new comment optimistically. Caller can revalidate if needed.
+      // Note: we don't perform a dedicated fetch here to avoid useEffect.
+      setCommentsList((prev) => [
+        ...prev,
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          user: { username: 'You', imageUrl: 'https://via.placeholder.com/40' },
+          content: newComment,
+          createdAt: new Date(),
+        } as Comment,
+      ]);
     } catch (error) {
       setError("Error adding comment. Please try again later.");
       console.error("Error adding comment:", error);
@@ -83,12 +60,6 @@ export default function CommentsSection({
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (showComments && commentsRef.current) {
-      commentsRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [showComments]);
 
   return (
     <>
@@ -149,7 +120,7 @@ export default function CommentsSection({
                     <p className="font-light">{comment.content}</p>
                   </div>
                 </div>
-                <CommentActions commentId={comment.id} authorId={authorId} />
+                <CommentActions commentId={comment.id} authorId={authorId} initialLikes={0} initialLiked={false} />
               </div>
             ))}
           </div>

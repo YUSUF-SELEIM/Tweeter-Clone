@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import {jwtDecode} from "jwt-decode";
 
@@ -18,43 +18,14 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const [authorId, setAuthorId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      router.push("/"); // Redirect to login if token is missing
-      return;
-    }
-
-    const validateToken = async () => {
-      try {
-        const response = await fetch("/api/auth/validate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          router.push("/"); // Invalid token, redirect to login
-        } else {
-          const decodedToken: { userId: string } = jwtDecode(token);
-          setAuthorId(decodedToken.userId); // Set the userId from the token
-        }
-      } catch (err) {
-        console.error("Error validating token:", err);
-        router.push("/"); // Error, redirect to login
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    validateToken();
-  }, [router]);
+  // Read token synchronously from localStorage on the client.
+  // NOTE: This removes the async validation step and avoids useEffect
+  // as requested. It will decode the token (if present) and expose the
+  // `authorId` immediately. This keeps the provider purely client-side.
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const initialAuthorId = token ? (jwtDecode(token) as { userId: string }).userId : null;
+  const [authorId] = useState<string | null>(initialAuthorId);
+  const [loading] = useState(false);
 
   return (
     <AuthContext.Provider value={{ authorId, loading }}>

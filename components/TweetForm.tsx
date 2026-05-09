@@ -9,8 +9,11 @@ import { Card } from './ui/card';
 import { Separator } from './ui/separator';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'; // Adjust path as necessary
 import { IoMdPerson } from 'react-icons/io'; // Person icon
+import { useAuth } from '@/context/AuthContext';
 
-export default function TweetForm({ authorId }: { authorId: string }) {
+export default function TweetForm({ authorId }: { authorId?: string }) {
+  const { authorId: contextAuthorId } = useAuth();
+  const resolvedAuthorId = authorId ?? contextAuthorId ?? '';
   const [tweetContent, setTweetContent] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,7 +37,7 @@ export default function TweetForm({ authorId }: { authorId: string }) {
 
     try {
       const payload = {
-        authorId,
+        authorId: resolvedAuthorId,
         content: tweetContent,
         imageUrl,
         replyOption, // Include the reply option in the payload
